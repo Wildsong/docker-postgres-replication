@@ -1,0 +1,10 @@
+FROM postgres:15
+MAINTAINER Brian H Wilson "brian@wildsong.biz"
+
+# Add files to support Esri ArcGIS geometry
+
+COPY PostgreSQL/15/Linux64/st_geometry.so /usr/lib/postgresql/15/lib
+# I wonder what this file is for?
+COPY PostgreSQL/15/Linux64/PGSQLEngine.so /usr/lib/postgresql/15/lib
+
+VOLUME /var/lib/postgresql/data

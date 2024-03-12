@@ -1,0 +1,50 @@
+volumes:
+  postgres_data:
+    name: postgres_data
+  postgres_standby_data:
+    name: postgres_standby_data
+  pgadmin_data:
+    name: pgadmin_data
+
+services:
+  postgres-primary:
+    hostname: pp
+    image: postgres
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  postgres-standby:
+    hostname: ps
+    image: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_standby_data:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "8213:80"
+    volumes:
+      # Session data, user files, config files, config database go here.
+      - pgadmin_data:/var/lib/pgadmin
+    env_file: .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_USER}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_DISABLE_POSTFIX: 1
+
+
