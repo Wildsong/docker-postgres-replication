@@ -8,15 +8,21 @@ volumes:
   pgadmin_data:
     name: pgadmin_data
     external: true
+
+# This will be used as the domainname, so let's keep it short.
+networks:
+  datastore:
+    name: datastore
     
 services:
   primary:
-    hostname: pp
+    container_name: dsprimary
     image: postgres
     build:
       context: .
       dockerfile: Dockerfile.postgres
     ports:
+      # Allow access to this database from our LAN
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -24,20 +30,26 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - datastore
 
   standby:
-    hostname: ps
+    container_name: dsstandby
     image: postgres
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_standby_data:/var/lib/postgresql/data
     env_file: .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    #ports:
+    # Normally we don't need any ports accessible outside our docker network
+    #  - "5433:5432"
+    networks:
+      - datastore
     
   pgadmin:
+    container_name: dspgadmin
     image: dpage/pgadmin4:latest
     ports:
       - "8213:80"
@@ -49,5 +61,5 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_USER}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
       PGADMIN_DISABLE_POSTFIX: 1
-
-
+    networks:
+      - datastore
