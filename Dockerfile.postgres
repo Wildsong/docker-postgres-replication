@@ -1,5 +1,8 @@
 FROM postgres:15
-MAINTAINER Brian H Wilson "brian@wildsong.biz"
+LABEL Author="Brian H Wilson"
+
+# I really want ip and ps and ping commands here. I mean, come on! I need them.
+RUN apt-get update && apt-get install -y procps iproute2 iputils-ping
 
 # Add files to support Esri ArcGIS geometry
 

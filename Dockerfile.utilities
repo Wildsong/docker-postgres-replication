@@ -1,0 +1,10 @@
+FROM postgres:15
+LABEL Author="Brian H Wilson"
+
+# I really want ip and ps and ping commands here. I mean, come on! I need them.
+RUN apt-get update && apt-get install -y procps iproute2 iputils-ping
+
+VOLUME /var/lib/postgresql/data
+
+ENTRYPOINT [ "bash" ]
+

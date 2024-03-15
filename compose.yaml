@@ -1,13 +1,16 @@
 volumes:
   postgres_data:
     name: postgres_data
+    #external: true
   postgres_standby_data:
     name: postgres_standby_data
+    #external: true
   pgadmin_data:
     name: pgadmin_data
-
+    external: true
+    
 services:
-  postgres-primary:
+  primary:
     hostname: pp
     image: postgres
     build:
@@ -22,7 +25,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
-  postgres-standby:
+  standby:
     hostname: ps
     image: postgres
     ports:

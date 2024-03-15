@@ -1,3 +1,8 @@
 *~
-PostgreSQL
+.env
+
+# This is the proprietary zip downloaded from Esri
+# so it can't be checked in here.
 ArcGIS_Enterprise_*.zip
+# This is where the zip file uncompresses
+PostgreSQL
