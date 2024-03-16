@@ -262,12 +262,65 @@ I can see the feature class now in pgadmin too, as a table. Cool. And it's in ds
 I wish there was a spatial viewer plugin or something in pgadmin; the "shape" column shows type "st_geometry"
 but shows only as a string of hex data.
 
+### TEST: Make a backup
+
+Basically "pg_dump dbname > dumpfile". In our world, where "mask" is the shapefile I loaded,
+
+  ./dsprimary.sh pg_dump -U postgres clatsop > clatsop.sql
+
+I dropped it with "force" from pgadmin then reloaded it with this clunky command.
+
+  ./dsprimary.sh createdb -U postgres -T template0 clatsop
+  docker exec `docker ps | grep dsprimary | cut -b 1-12` psql -U postgres clatsop < clatsop.sql
+
+Using my nifty script does not work because of the "it" which throws a NOT A TTY error.
+
 ### TEST: Force failover
 
 What happens if the primary fails? I want to be able to update my connection in Pro to the standby
 and press on
 
 ## Notes on DataStore
+
+### Setting up a pgadmin connection
+
+As with the plain vanilla Postgres set up, you will need
+
+1. An account; normally this is the 'postgres' account but that won't work here. There will always be an "sde" account.
+Get the password for sde from the listadminusers.bat tool.
+On my server it shows (yes I XXXED out the passwords, paranoid but I did.)
+
+After an hour of pounding on this, I finally figured out that pgadmin wanted to use an IP address for
+ArcGIS Datastore server. Then the "sde" account and its hidden password worked. Don't forget the port is 9876.
+
+    PS C:\Program Files\ArcGIS\DataStore\tools> .\listadminusers.bat
+
+    Admin users for relational data store ds_atjwr8b3
+    ================================================
+    Database Admin User.... adm_o77v5 / XXXXXXXXXXXX
+    Database Repl User..... dsrepuser / XXXXXXXXXXXX
+    GDB Admin User......... sde / XXXXXXXXXXX
+
+    Admin user for queue store 4lteg8k
+    ================================================
+    Store admin user....... mc0jdkyr / XXXXXXXXXXXXX
+
+Once I figured out using the IP address in pgadmin I was able to whip up a connection to the standby.
+Then for kicks I created a database in the primary to see it replicate. It did. Then I deleted it. It deleted both places.
+
+It looks like the database "db_0eoas" is where the actual data lives, in a schema called "hsu_9vn8j. There
+are tables in there with familiar names like contours_contour
+"db_admindb" is administrative and "webhooks" is... probably webhooks.
+
+2. An entry in pg_hba.conf allowing pgadmin to connect.
+
+You can use the "allowconnections" tool to do this or just edit the pg_hba.conf file yourself.
+That's all allowconnections does.
+
+   allowconnections 10.10.4.70 ccgisadmin all
+
+**You have to restart ArcGIS Datastore in the Service Manager to have the changes take effect.**
+
 
 Here is a diff of the postgresql.conf files for datastore on primary and standby, "<" is standby and ">" is primary currently.
 
